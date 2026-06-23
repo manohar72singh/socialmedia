@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://techdigi.in/sitemap.xml
