@@ -35,6 +35,7 @@ import Blog from './components/Blog';
 import BlogDetail from './components/BlogDetail';
 import Awards from './components/Awards';
 import GrowthToolsHub from './components/GrowthToolsHub';
+import ROICalculator from './components/ROICalculator';
 
 import ClientLogin from './pages/ClientLogin';
 import ClientDashboard from './pages/ClientDashboard';

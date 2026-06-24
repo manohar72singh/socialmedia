@@ -55,19 +55,19 @@ router.post('/', async (req, res) => {
             }
         }
 
-        const chatSession = ai.models.startChat({
+        const reply = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            history: contents.slice(0, -1),
-            systemInstruction: SYSTEM_PROMPT
+            contents: contents,
+            config: {
+                systemInstruction: SYSTEM_PROMPT
+            }
         });
-        
-        const reply = await chatSession.sendMessage(message);
         
         if (req.io) {
             req.io.emit('new_chat', { message: message.substring(0, 50) + '...' });
         }
 
-        res.json({ reply: reply.response.text() });
+        res.json({ reply: reply.text });
     } catch (error) {
         console.error('Error from Gemini API:', error);
         res.status(500).json({ error: 'Failed to generate response' });
