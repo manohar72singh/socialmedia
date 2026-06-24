@@ -55,7 +55,7 @@ router.post('/', async (req, res) => {
             }
         }
 
-        const generateWithRetry = async (modelName, contents, config, retries = 3) => {
+        const generateWithRetry = async (modelName, contents, config, retries = 5) => {
             for (let i = 0; i < retries; i++) {
                 try {
                     return await ai.models.generateContent({
@@ -76,24 +76,9 @@ router.post('/', async (req, res) => {
             }
         };
 
-        let reply;
-        try {
-            reply = await generateWithRetry('gemini-2.5-flash', contents, {
-                systemInstruction: SYSTEM_PROMPT
-            });
-        } catch (genError) {
-            console.warn('gemini-2.5-flash failed with error, falling back to gemini-2.0-flash...');
-            try {
-                reply = await generateWithRetry('gemini-2.0-flash', contents, {
-                    systemInstruction: SYSTEM_PROMPT
-                });
-            } catch (fallbackError2) {
-                console.warn('gemini-2.0-flash failed, falling back to gemini-1.5-flash...');
-                reply = await generateWithRetry('gemini-1.5-flash', contents, {
-                    systemInstruction: SYSTEM_PROMPT
-                });
-            }
-        }
+        const reply = await generateWithRetry('gemini-2.5-flash', contents, {
+            systemInstruction: SYSTEM_PROMPT
+        });
         
         if (req.io) {
             req.io.emit('new_chat', { message: message.substring(0, 50) + '...' });

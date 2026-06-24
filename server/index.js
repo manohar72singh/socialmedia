@@ -112,6 +112,12 @@ app.use('/api/auth', authRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/settings', settingsRouter);
 
+const aiToolsRouter = require('./routes/ai_tools');
+const stripeRouter = require('./routes/stripe');
+
+app.use('/api/ai-tools', aiToolsRouter);
+app.use('/api/stripe', stripeRouter);
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

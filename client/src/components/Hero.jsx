@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, CheckCircle2, TrendingUp, Zap } from 'lucide-react';
-import ParticlesBackground from './ParticlesBackground';
+import Hero3DBackground from './Hero3DBackground';
 
 const words = ["Digital Landscape", "SEO Rankings", "Sales & Leads", "Brand Growth"];
 
@@ -33,8 +33,8 @@ export default function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-[#020617] pt-24 sm:pt-20 px-5 sm:px-6 overflow-hidden">
       
-      {/* Interactive Particles */}
-      <ParticlesBackground />
+      {/* 3D Interactive Background */}
+      <Hero3DBackground />
 
       {/* Grid background (subtle) */}
       <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none z-0" />

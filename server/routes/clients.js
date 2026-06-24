@@ -47,14 +47,21 @@ router.post('/', async (req, res) => {
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
-        const [rows] = await pool.promise().query('SELECT id, username, name, email FROM clients WHERE email = ? AND password = ?', [email, password]);
+        const [rows] = await pool.promise().query('SELECT * FROM clients WHERE email = ? AND password = ?', [email, password]);
         if (rows.length > 0) {
             const user = rows[0];
             const token = jwt.sign(
-                { id: user.id, role: 'client', username: user.username },
+                { 
+                    id: user.id, 
+                    role: 'client', 
+                    username: user.username,
+                    tier: user.tier || 'free'
+                },
                 process.env.JWT_SECRET || 'supersecrettechdigikey123',
                 { expiresIn: '7d' }
             );
+            // Hide password from response
+            delete user.password;
             res.json({ success: true, token, user });
         } else {
             res.status(401).json({ error: 'Invalid email or password' });
@@ -68,7 +75,7 @@ router.post('/login', async (req, res) => {
 // GET /api/clients/:username - Get client dashboard data
 router.get('/:username', async (req, res) => {
     try {
-        const [rows] = await pool.promise().query('SELECT name, email, project_status, project_details, created_at FROM clients WHERE username = ?', [req.params.username]);
+        const [rows] = await pool.promise().query('SELECT id, name, email, project_status, project_details, tier, created_at FROM clients WHERE username = ?', [req.params.username]);
         if (rows.length > 0) {
             res.json(rows[0]);
         } else {

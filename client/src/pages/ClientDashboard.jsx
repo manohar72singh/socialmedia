@@ -8,6 +8,10 @@ import jsPDF from 'jspdf';
 import toast from 'react-hot-toast';
 import ClientVault from '../components/ClientVault';
 import ClientCalendar from '../components/ClientCalendar';
+import PremiumBadge from '../components/PremiumBadge';
+import AIContentGenerator from '../components/AIContentGenerator';
+import AdvancedAnalytics from '../components/AdvancedAnalytics';
+import SubscriptionManager from '../components/SubscriptionManager';
 
 export default function ClientDashboard() {
   const { username } = useParams();
@@ -145,8 +149,9 @@ export default function ClientDashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1E293B]/50 p-6 rounded-3xl border border-slate-800" data-html2canvas-ignore>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent flex items-center gap-3">
               Welcome back, {clientData.name}
+              <PremiumBadge tier={clientData.tier} />
             </h1>
             <p className="text-slate-400 mt-1">Here's your active campaign progress with Tech Digi.</p>
           </div>
@@ -380,6 +385,21 @@ export default function ClientDashboard() {
               ))}
             </div>
           )}
+        </motion.div>
+
+        {/* Subscription Management */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+          <SubscriptionManager currentTier={clientData.tier || 'free'} clientId={clientData.id} email={clientData.email} />
+        </motion.div>
+
+        {/* AI Content Generator */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+          <AIContentGenerator tier={clientData.tier || 'free'} clientId={clientData.id} />
+        </motion.div>
+
+        {/* Advanced Analytics */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+          <AdvancedAnalytics tier={clientData.tier || 'free'} />
         </motion.div>
 
         {/* Password Vault Section */}
