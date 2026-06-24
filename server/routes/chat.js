@@ -55,13 +55,29 @@ router.post('/', async (req, res) => {
             }
         }
 
-        const reply = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: contents,
-            config: {
-                systemInstruction: SYSTEM_PROMPT
+        let reply;
+        try {
+            reply = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: contents,
+                config: {
+                    systemInstruction: SYSTEM_PROMPT
+                }
+            });
+        } catch (genError) {
+            if (genError.status === 503 || (genError.message && genError.message.includes('503'))) {
+                console.warn('gemini-2.5-flash is busy, falling back to gemini-1.5-flash...');
+                reply = await ai.models.generateContent({
+                    model: 'gemini-1.5-flash',
+                    contents: contents,
+                    config: {
+                        systemInstruction: SYSTEM_PROMPT
+                    }
+                });
+            } else {
+                throw genError;
             }
-        });
+        }
         
         if (req.io) {
             req.io.emit('new_chat', { message: message.substring(0, 50) + '...' });
@@ -70,7 +86,10 @@ router.post('/', async (req, res) => {
         res.json({ reply: reply.text });
     } catch (error) {
         console.error('Error from Gemini API:', error);
-        res.status(500).json({ error: error.message || 'Failed to generate response' });
+        
+        // Return a friendly fallback message instead of a raw API error
+        const friendlyMessage = "I'm currently assisting a lot of clients and experiencing high traffic. Please try again in a few moments or contact our support!";
+        res.json({ reply: friendlyMessage });
     }
 });
 
