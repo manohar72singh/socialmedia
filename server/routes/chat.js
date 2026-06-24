@@ -55,27 +55,43 @@ router.post('/', async (req, res) => {
             }
         }
 
+        const generateWithRetry = async (modelName, contents, config, retries = 3) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    return await ai.models.generateContent({
+                        model: modelName,
+                        contents: contents,
+                        config: config
+                    });
+                } catch (error) {
+                    const is503 = error.status === 503 || (error.message && error.message.includes('503'));
+                    if (is503 && i < retries - 1) {
+                        const delay = 1000 * Math.pow(2, i);
+                        console.warn(`[Retry] Model ${modelName} is busy (503). Retrying in ${delay}ms... (Attempt ${i + 1}/${retries - 1})`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+        };
+
         let reply;
         try {
-            reply = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: contents,
-                config: {
-                    systemInstruction: SYSTEM_PROMPT
-                }
+            reply = await generateWithRetry('gemini-2.5-flash', contents, {
+                systemInstruction: SYSTEM_PROMPT
             });
         } catch (genError) {
-            if (genError.status === 503 || (genError.message && genError.message.includes('503'))) {
-                console.warn('gemini-2.5-flash is busy, falling back to gemini-1.5-flash...');
-                reply = await ai.models.generateContent({
-                    model: 'gemini-1.5-flash',
-                    contents: contents,
-                    config: {
-                        systemInstruction: SYSTEM_PROMPT
-                    }
+            console.warn('gemini-2.5-flash failed with error, falling back to gemini-2.0-flash...');
+            try {
+                reply = await generateWithRetry('gemini-2.0-flash', contents, {
+                    systemInstruction: SYSTEM_PROMPT
                 });
-            } else {
-                throw genError;
+            } catch (fallbackError2) {
+                console.warn('gemini-2.0-flash failed, falling back to gemini-1.5-flash...');
+                reply = await generateWithRetry('gemini-1.5-flash', contents, {
+                    systemInstruction: SYSTEM_PROMPT
+                });
             }
         }
         
